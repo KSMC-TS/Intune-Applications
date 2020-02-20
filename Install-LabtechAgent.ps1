@@ -19,9 +19,9 @@ if($Mode -eq "Install") {
 
     $Path = $env:TEMP
     $Installer = "LTInstall.exe"
-    Invoke-WebRequest $installBlob -OutFile $Path\$Installer
-    Start-Process -FilePath $Path\$Installer -Args "/sAll /rs /rps /msi /norestart /quiet EULA_ACCEPT=YES" -Verb RunAs -Wait
-    Remove-Item $Path\$Installer
+    Invoke-WebRequest $installBlob -OutFile "$Path\$Installer"
+    Start-Process -FilePath "$Path\$Installer" -ArgumentList "/sAll /rs /rps /msi /norestart /quiet EULA_ACCEPT=YES" -Verb RunAs -Wait
+    Remove-Item "$Path\$Installer"
 
     } catch {
 
@@ -39,8 +39,8 @@ if($Mode -eq "Uninstall") {
 
     $Path = $env:TEMP
     $Installer = "LTUninstall.exe"
-    Invoke-WebRequest $installBlob -OutFile $Path\$Install
-    Start-Process -FilePath $Path\$Installer -Args "/sAll /rs /rps /msi /quiet EULA_ACCEPT=YES" -Verb RunAs -Wait
+    Invoke-WebRequest $installBlob -OutFile "$Path\$Installer"
+    Start-Process -FilePath "$Path\$Installer" -ArgumentList "/sAll /rs /rps /msi /quiet EULA_ACCEPT=YES" -Verb RunAs -Wait
 
     } catch {
 
