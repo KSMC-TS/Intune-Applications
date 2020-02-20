@@ -39,7 +39,7 @@ if($Mode -eq "Uninstall") {
 
     $Path = $env:TEMP
     $Installer = "LTUninstall.exe"
-    Invoke-WebRequest $uninstallBlob -OutFile $Path\$Install
+    Invoke-WebRequest $installBlob -OutFile $Path\$Install
     Start-Process -FilePath $Path\$Installer -Args "/sAll /rs /rps /msi /quiet EULA_ACCEPT=YES" -Verb RunAs -Wait
 
     } catch {
