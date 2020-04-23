@@ -20,7 +20,7 @@ if($Mode -eq "Install") {
         }
 
     #invoke web request with headers and parse json to pull download url
-    $jsonRequest = Invoke-WebRequest "https://get.adobe.com/reader/webservices/json/standalone/?platform_type=Windows&platform_dist=Windows%2010&platform_arch=&language=English&eventname=readerotherversions" -Headers $headers | ConvertFrom-Json
+    $jsonRequest = Invoke-WebRequest "https://get.adobe.com/reader/webservices/json/standalone/?platform_type=Windows&platform_dist=Windows%2010&platform_arch=&language=English&eventname=readerotherversions" -Headers $headers -UseBasicParsing | ConvertFrom-Json
     $downloadUrl = $jsonRequest.download_url
 
     #set download location, installer name, pull down installer and begin silent install
