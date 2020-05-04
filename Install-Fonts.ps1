@@ -29,7 +29,7 @@
     Last updated:       05/04/2020
     Creation Date:      05/04/2020
     Author:             Zachary Choate
-    URL:                
+    URL:                https://raw.githubusercontent.com/zchoate/Intune-Applications/master/Install-Fonts.ps1
 #>
 
 param(
