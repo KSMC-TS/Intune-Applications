@@ -20,9 +20,9 @@
 .PARAMETER logFile
     Specify location of log file. Otherwise log file will be created in $env:Temp.
 .EXAMPLE
-    Add-Font.ps1 -packaged -installedString "05-04-2020"
+    Install-Font.ps1 -packaged -installedString "05-04-2020"
         This will run the script looking for fonts packaged with script in $PSScriptRoot\Fonts and update registry upon completion with string 05-04-2020.
-    Add-Font.ps1 -storageURL "https://blobsfordays.blob.core.windows.net/container" -sasToken "sp=r&st=2020-05-04T..." -installedString "05-04-2020"
+    Install-Font.ps1 -storageURL "https://blobsfordays.blob.core.windows.net/container" -sasToken "sp=r&st=2020-05-04T..." -installedString "05-04-2020"
         This will run the script pulling down the fonts from the specified URL and update registry upon completion with string 05-04-2020.
 .NOTES
     Version:            0.1
