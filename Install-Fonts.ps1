@@ -25,7 +25,7 @@
     Install-Font.ps1 -storageURL "https://blobsfordays.blob.core.windows.net/container" -sasToken "?st=2020-05-04..." -installedString "05-04-2020"
         This will run the script pulling down the fonts from the specified URL and update registry upon completion with string 05-04-2020.
 .NOTES
-    Version:            0.1
+    Version:            0.2
     Last updated:       05/05/2020
     Creation Date:      05/04/2020
     Author:             Zachary Choate
@@ -184,9 +184,9 @@ if( (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WOW6432Node\fontDeploy" -Name "
 }
 
 # Check to see if we're pulling from blob storage.
-if( [string]::IsNullOrEmpty($packaged) ) {
+if( !($packaged) ) {
 
-    if( [string]::IsNullOrEmpty($storageURL) -or [string]::IsNullOrEmpty($sasToken) ) {
+    if( !($storageURL) -or !($sasToken) ) {
 
             Write-Output "$(Get-TimeStamp) ERROR: No location specified for pulling down fonts. Please specifiy location for fonts or include in package." | Out-File $logFile -Append
             Exit 1308
@@ -196,7 +196,7 @@ if( [string]::IsNullOrEmpty($packaged) ) {
     try {
 
         # Create directory to drop files
-        $installRoot = "$env:TEMP\$(Get-TimeStamp)_install-font"
+        $installRoot = "$env:TEMP\$(Get-Date -Format yyyyMMddhhmm)_install-font"
         New-Item -Type Directory -Path $installRoot -Force
         if( !(Test-Path -Path $installRoot) ) {
 
@@ -205,7 +205,7 @@ if( [string]::IsNullOrEmpty($packaged) ) {
 
         }
 
-        Invoke-BlobItems -URL "$storageURL$sas" -Path $installRoot | Out-Null
+        Invoke-BlobItems -URL "$storageURL$sasToken" -Path $installRoot | Out-Null
 
     } catch {
 
