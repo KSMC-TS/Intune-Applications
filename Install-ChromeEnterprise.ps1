@@ -1,9 +1,29 @@
     param(
-    [Parameter(Mandatory=$true)]
-    [ValidateSet('Install','Uninstall')]
-    [String[]]
-    $Mode
+        [Parameter(Mandatory=$true)]
+        [ValidateSet('Install','Uninstall')]
+        [String]$Mode
     )
+
+$argsString = ""
+If ($ENV:PROCESSOR_ARCHITEW6432 -eq "AMD64") {
+    Try {
+        foreach($k in $MyInvocation.BoundParameters.keys)
+        {
+            switch($MyInvocation.BoundParameters[$k].GetType().Name)
+            {
+                "SwitchParameter" {if($MyInvocation.BoundParameters[$k].IsPresent) { $argsString += "-$k " } }
+                "String"          { $argsString += "-$k `"$($MyInvocation.BoundParameters[$k])`" " }
+                "Int32"           { $argsString += "-$k $($MyInvocation.BoundParameters[$k]) " }
+                "Boolean"         { $argsString += "-$k `$$($MyInvocation.BoundParameters[$k]) " }
+            }
+        }
+        Start-Process -FilePath "$ENV:WINDIR\SysNative\WindowsPowershell\v1.0\PowerShell.exe" -ArgumentList "-File `"$($PSScriptRoot)\$($MyInvocation.MyCommand)`" $($argsString)" -Wait -NoNewWindow
+    }
+    Catch {
+        Throw "Failed to start 64-bit PowerShell"
+    }
+    Exit
+}
 
 
     ## Install block ##
@@ -11,10 +31,10 @@
         $Path = $env:TEMP
         $Installer = "chrome_enterprise64.msi"
         Invoke-WebRequest "https://dl.google.com/chrome/install/googlechromestandaloneenterprise64.msi" -OutFile $Path\$Installer
-        Start-Process -FilePath $env:Windir\System32\msiexec.exe -ArgumentList "/i $Path\$Installer /qn" -Verb RunAs -Wait
+        $InstallCommand = Start-Process -FilePath $env:Windir\System32\msiexec.exe -ArgumentList "/i $Path\$Installer /qn" -Verb RunAs -Wait -PassThru
         Remove-Item $Path\$Installer
-        Exit 0
-        }
+        Exit $InstallCommand.ExitCode
+    }
 
 
     ## Uninstall block ##
@@ -22,9 +42,15 @@
         $uninstall_strings = Get-ChildItem -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall, HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall | Get-ItemProperty | Where-Object {$_.DisplayName -match "chrome" } | Select-Object -Property DisplayName, UninstallString, PSChildName
             foreach ($uninstall_string in $uninstall_strings) {
             $string = $uninstall_string.PSChildName
-            Start-Process "msiexec.exe" -ArgumentList "/X$string /qn" -Wait -NoNewWindow
+            $LogPath = "$env:windir\Temp\ChromeUninstall_$(get-date -Format yyyyMMddTHHmmss).log"
+                $Arguments = @(
+                    "/x"
+                    "$string"
+                    "/qn"
+                    "/L*"
+                    "$LogPath"
+                )
+            $UninstallCommand = Start-Process msiexec.exe -ArgumentList $Arguments -Wait -PassThru -NoNewWindow
             }
-        Exit 0
-        }
-
-    Exit 1618
+        Exit $UninstallCommand.ExitCode
+    }
