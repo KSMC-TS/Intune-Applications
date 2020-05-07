@@ -248,7 +248,7 @@ if( (Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WOW6432Node\fontDeploy" -Name "
     Write-Output "$(Get-TimeStamp) INFO: Install string successfully applied. Cleaning up install." | Out-File $logFile -Append
     Remove-Item -Recurse -Path $installRoot -Force
     Remove-Item -Path $PSCommandPath -Force
-    Exit 0
+    Exit 3010
 
 }
 
