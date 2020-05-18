@@ -20,7 +20,7 @@ if($Mode -eq "Install") {
     if (Test-Path -Path "$Path\$Installer") {
         Copy-Item "$Path\$Installer" -Destination "$Path\1_$Installer"
         Stop-Process $process -Force
-        Start-Process msiexec -ArgumentList "/i $Path\1_$Installer /qn ADDLOCAL=ExplorerExtension,ChromeExtension,FirefoxExtension,EdgeExtension,LastpassUwpApp,DesktopShortcut,Updater,BinaryComponent" -Wait
+        Start-Process msiexec -ArgumentList "/i $Path\1_$Installer /qn ADDLOCAL=ExplorerExtension,ChromeExtension,FirefoxExtension,EdgeExtension,DesktopShortcut,Updater,BinaryComponent" -Wait
         } else {
             Exit 1618
         }
