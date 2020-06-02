@@ -47,7 +47,7 @@ If ($ENV:PROCESSOR_ARCHITEW6432 -eq "AMD64") {
         $Installer = $baseUrl[$baseUrl.Count - 1].Replace("%20","")
         Invoke-RestMethod -Uri $downloadUrl -OutFile $Path\$Installer -UseBasicParsing
         $InstallCommand = Start-Process -FilePath "$env:Windir\System32\msiexec.exe" -ArgumentList "/i $Path\$Installer /qn" -Verb RunAs -Wait -PassThru
-        #Remove-Item $Path\$Installer
+        Remove-Item $Path\$Installer
         Exit $InstallCommand.ExitCode
     }
 
