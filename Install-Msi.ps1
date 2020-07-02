@@ -22,7 +22,7 @@
     Last updated:   06/04/2020
     Creation date:  06/02/2020
     Author:         Zachary Choate
-    URL:            https://raw.githubusercontent.com/zchoate/Intune-Applications/master/Install-Msi.ps1
+    URL:            https://raw.githubusercontent.com/zchoate/Intune-Applications/main/Install-Msi.ps1
 #>
 
 param(
