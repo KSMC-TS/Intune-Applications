@@ -30,7 +30,7 @@ if($Mode -eq "Install") {
     }
 
 } 
-
+powershell.exe -ExecutionPolicy Bypass -file Deploy-InstallScript.ps1 -mode install -scripturl "https://cpwmintune.blob.core.windows.net/scripts/Install-Msi.ps1" -scriptargs "-downloadurl 'https://cpwmintune.blob.core.windows.net/installers/WFBS-SVC_Agent_Installer.msi?sp=r&st=2020-07-13T21:21:34Z&se=2024-07-14T05:21:34Z&spr=https&sv=2019-10-10&sr=b&sig=NAHf90RqRXogxGjScWw1WXovxwz%2Firq6JzI7vGXp3pA%3D'"
 
 ## Uninstall block ##
 if($Mode -eq "Uninstall") {
