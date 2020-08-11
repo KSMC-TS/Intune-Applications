@@ -52,7 +52,7 @@ If ($ENV:PROCESSOR_ARCHITEW6432 -eq "AMD64") {
     Catch {
         Throw "Failed to start 64-bit PowerShell"
     }
-    Exit
+    Return
 }
 
     ## Install block ##
@@ -74,13 +74,13 @@ If ($ENV:PROCESSOR_ARCHITEW6432 -eq "AMD64") {
         Invoke-RestMethod -Uri $downloadUrl -OutFile $Path\$Installer -UseBasicParsing
         $InstallCommand = Start-Process -FilePath "$env:Windir\System32\msiexec.exe" -ArgumentList "/i $Path\$Installer /qn" -Wait -PassThru
         Remove-Item $Path\$Installer
-        Exit $InstallCommand.ExitCode
+        Return $InstallCommand.ExitCode
 
     } elseif ($packagedInstaller) {
     ## packaged installer block ##
 
         $InstallCommand = Start-Process -FilePath "$env:Windir\System32\msiexec.exe" -ArgumentList "/i $PSScriptRoot\$packagedInstaller /qn" -Wait -PassThru
-        Exit $InstallCommand.ExitCode
+        Return $InstallCommand.ExitCode
 
     } elseif ($uninstall) {
     ## Uninstall block ##
@@ -91,6 +91,6 @@ If ($ENV:PROCESSOR_ARCHITEW6432 -eq "AMD64") {
             $LogPath = "$env:Temp\$($uninstall)_$(get-date -Format yyyyMMddTHHmmss).log"
             $UninstallCommand = Start-Process "$env:Windir\System32\msiexec.exe" -ArgumentList "/x$string /qn /L*V `"$logPath`"" -Wait -PassThru
             }
-        Exit $UninstallCommand.ExitCode
+        Return $UninstallCommand.ExitCode
 
     }
