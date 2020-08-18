@@ -1,15 +1,14 @@
 param(
-[Parameter(Mandatory=$true)]
-[ValidateSet('Install','Uninstall')]
-[String[]]
-$Mode
+    [Parameter(Mandatory=$true)]
+    [ValidateSet('Install','Uninstall')]
+    [String]$Mode
 )
 
 #Change These Variables Per App
-$appname = "Labtech" #needs to match Uninstall DisplayName in Registry
+$appname = "" #needs to match Uninstall DisplayName in Registry
 $appurl = "" #url to pull app from (GitHub, Azure Blob, etc.)
-$addtlargs = "/sAll /rs /rps /msi /norestart EULA_ACCEPT=YES" #any additional args needed for install command
-$installertype = "exe" # 'msi' or 'exe'
+$addtlargs = "" #any additional args needed for install command
+$installertype = "" # 'msi' or 'exe'
 
 $appnamel = $appname.Replace(" ","-")
 $Path = $env:TEMP
@@ -54,21 +53,35 @@ if($Mode -eq "Install") {
 if($Mode -eq "Uninstall") {
     $date = Get-Date -Format "MM/dd/yyyy-HH:mm:ss"
     $(
-        Write-Output "Date: $date"
+        Write-Output "Date: $date" 
+        Write-Output "Pulling Uninstall Strings"
+        $uninstall_strings = Get-ChildItem -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall, HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall | Get-ItemProperty | Where-Object {$_.DisplayName -match "$appname" } | Select-Object -Property DisplayName, UninstallString, PSChildName
+        foreach ($uninstall_string in $uninstall_strings) {
+            Write-Output "Running uninstall: $uninstall_string"
+            if ($uninstall_string.UninstallString -match "MsiExec.exe*") { $installertype = "msi" }
+            if ($installertype -eq "exe") {
+                $string = $uninstall_string.UninstallString
+                Write-Output "Running Uninstall mode: exe"
+                if ($null -match $addtlargs) {
+                    $UninstallCommand = Start-Process $string -Verb RunAs -Wait 
+                } else {
+                    $UninstallCommand = Start-Process $string -ArgumentList "$addtlargs" -Verb RunAs -Wait
+                }
+            } elseif ($installertype -eq "msi") {
+                $string = $uninstall_string.PSChildName
+                $Logfile = "$logpath\uninstalllog-$appnamel-$(get-date -Format yyyyMMddTHHmmss).log"
+                Write-Output "msiexec uninstall log: $logfile"
+                $UninstallCommand = Start-Process "$env:Windir\System32\msiexec.exe" -ArgumentList "/x$string /qn /L*V `"$logfile`"" -Verb RunAs -Wait -PassThru
+            } else {
+                Write-Output "Unrecognized installer type: $installertype"
+            }
+        }
         
-        ## custom uninstall script - different from standard template ##
-        Write-Output "Importing LT Module to Run Uninstall"
-        (new-object Net.WebClient).DownloadString('https://bit.ly/LTPoSh') | iex
-        Write-Output "Running Uninstall"
-        Uninstall-LTService    
-        ## end custom section
-
         #add any post-uninstall tasks here
 
         Write-Output "Uninstall Complete!"
         Write-Output "############################################################"
     ) *>&1 >> $applog
-    Exit 0
+    Exit $UninstallCommand.ExitCode
 }
-
 Exit 1618

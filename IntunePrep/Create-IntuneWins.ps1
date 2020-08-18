@@ -1,6 +1,6 @@
 param (
     $basedir = "C:\Users\fgottman\KSM Consulting\Centerpoint Wealth Management - Azure AD Migration",
-    $exe = "C:\github\Intune-Applications\IntunePrep\IntuneWinAppUtil.exe"
+    $exe = "C:\github\derfnamttog\Intune-Applications\IntunePrep\IntuneWinAppUtil.exe"
 )
 
 $intunedir = "$basedir\intune"

@@ -1,3 +1,5 @@
+## deprecated, can now deploy straight from Intune
+
 $BLinfo = Get-Bitlockervolume
 
 if($BLinfo.EncryptionPercentage -ne '100' -and $BLinfo.EncryptionPercentage -ne '0'){

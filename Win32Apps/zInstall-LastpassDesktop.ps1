@@ -1,3 +1,5 @@
+## deprecated, deploy MS Store App
+
 param(
 [Parameter(Mandatory=$true)]
 [ValidateSet('Install','Uninstall')]
