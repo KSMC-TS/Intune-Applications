@@ -7,9 +7,14 @@ $Mode
 
 #Change These Variables Per App
 $appname = "Microsoft Dynamics 365" #needs to match Uninstall DisplayName in Registry
-$appurl = "https://download.microsoft.com/download/A/6/A/A6A9217D-8980-45D1-BAF4-E813107989FA/CRM2016-Client-ENU-amd64.exe" #url to pull app from (GitHub, Azure Blob, etc.)
+$appurl64 = "https://download.microsoft.com/download/A/6/A/A6A9217D-8980-45D1-BAF4-E813107989FA/CRM2016-Client-ENU-amd64.exe" #url to pull app from (GitHub, Azure Blob, etc.)
+$appurl32 = "https://download.microsoft.com/download/A/6/A/A6A9217D-8980-45D1-BAF4-E813107989FA/CRM2016-Client-ENU-i386.exe" #url to pull app from (GitHub, Azure Blob, etc.)
 $addtlargs = "" #any additional args needed for install command
 $installertype = "exe" # 'msi' or 'exe'
+
+# check for office install
+$bitnesskey = "HKLM:\SOFTWARE\Microsoft\Office\16.0\Outlook"
+$officebitness = Get-ItemProperty -Path $bitnesskey | Select-Object -ExpandProperty Bitness
 
 $appnamel = $appname.Replace(" ","-")
 $Path = $env:TEMP
@@ -24,9 +29,18 @@ if($Mode -eq "Install") {
         Write-Output "Date: $date" 
         Write-Output "Temp path is set: $path"
         $Installer = "$appnamel.$installertype"
-        Write-Output "Downloading Installer `"$installer`" from `"$appurl`""
-        Invoke-WebRequest $appurl -OutFile $Path\$Installer
-        
+
+        if ($officebitness -eq "x64") {
+            Write-Output "Downloading Installer `"$installer`" from `"$appurl64`""
+            Invoke-WebRequest $appurl64 -OutFile $Path\$Installer
+        } elseif ($officebitness -eq "x32") {
+            Write-Output "Downloading Installer `"$installer`" from `"$appurl32`""
+            Invoke-WebRequest $appurl32 -OutFile $Path\$Installer
+        } else {
+            Write-Output "Office version not detected. Is Office installed?"
+            Exit 1618
+        }
+
         ## Custom Install - different from standard template ##
         $installer2 = "SetupClient.exe"
         $extractpath = "C:\Dynamics"

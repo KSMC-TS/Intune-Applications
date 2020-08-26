@@ -5,10 +5,10 @@ param(
 )
 
 #Change These Variables Per App
-$appname = "" #needs to match Uninstall DisplayName in Registry
-$appurl = "" #url to pull app from (GitHub, Azure Blob, etc.)
-$addtlargs = "" #any additional args needed for install command
-$installertype = "" # 'msi' or 'exe'
+$appname = "Citrix Workspace" #needs to match Uninstall DisplayName in Registry
+$appurl = "https://downloads.citrix.com/17880/CitrixWorkspaceApp.exe?__gda__=1597807857_7d4e183c28633ed1f3f8cb53c5521364" #url to pull app from (GitHub, Azure Blob, etc.)
+$addtlargs = "/silent /includeSSON" #any additional args needed for install command
+$installertype = "exe" # 'msi' or 'exe'
 
 $appnamel = $appname.Replace(" ","-")
 $Path = $env:TEMP

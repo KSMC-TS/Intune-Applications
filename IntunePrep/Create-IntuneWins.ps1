@@ -1,5 +1,5 @@
 param (
-    $basedir = "C:\Users\fgottman\KSM Consulting\Centerpoint Wealth Management - Azure AD Migration",
+    $basedir = "C:\Users\fgottman\KSM Consulting\Praxis Consulting - MDM InTune",
     $exe = "C:\github\derfnamttog\Intune-Applications\IntunePrep\IntuneWinAppUtil.exe"
 )
 
@@ -29,3 +29,4 @@ foreach ($file in $files) {
 
 
 
+## fix for printer intunewin scripts
