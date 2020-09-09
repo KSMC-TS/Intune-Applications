@@ -1,6 +1,6 @@
 param (
-    $basedir = "C:\Users\fgottman\KSM Consulting\Praxis Consulting - MDM InTune",
-    $exe = "C:\github\derfnamttog\Intune-Applications\IntunePrep\IntuneWinAppUtil.exe"
+    $basedir = "",
+    $exe = ""
 )
 
 $intunedir = "$basedir\intune"
