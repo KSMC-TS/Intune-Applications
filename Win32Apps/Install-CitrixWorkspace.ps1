@@ -6,7 +6,7 @@ param(
 
 #Change These Variables Per App
 $appname = "Citrix Workspace" #needs to match Uninstall DisplayName in Registry
-$appurl = "https://downloads.citrix.com/17880/CitrixWorkspaceApp.exe?__gda__=1597807857_7d4e183c28633ed1f3f8cb53c5521364" #url to pull app from (GitHub, Azure Blob, etc.)
+$appurl = "" #url to pull app from (GitHub, Azure Blob, etc.)
 $addtlargs = "/silent /includeSSON" #any additional args needed for install command
 $installertype = "exe" # 'msi' or 'exe'
 
@@ -61,11 +61,21 @@ if($Mode -eq "Uninstall") {
             if ($uninstall_string.UninstallString -match "MsiExec.exe*") { $installertype = "msi" }
             if ($installertype -eq "exe") {
                 $string = $uninstall_string.UninstallString
+                    if ($string -match "/") {
+                    $expandedstring = ($string -split "/") 
+                    $uninstallfile = ($expandedstring[0]).Replace("`"","")
+                    $uninstallargs = $expandedstring[1..($ExpandedString.Length)]
+                    foreach ($arg in $uninstallargs) {
+                        $fullarg = "/$arg"
+                        $arglist += $fullarg
+                    }
+                    [string]$addtlargs = $arglist
+                }
                 Write-Output "Running Uninstall mode: exe"
                 if ($null -match $addtlargs) {
-                    $UninstallCommand = Start-Process $string -Verb RunAs -Wait 
+                    $UninstallCommand = Start-Process $uninstallfile -Verb RunAs -Wait 
                 } else {
-                    $UninstallCommand = Start-Process $string -ArgumentList "$addtlargs" -Verb RunAs -Wait
+                    $UninstallCommand = Start-Process $uninstallfile -ArgumentList "/silent $addtlargs" -Verb RunAs -Wait
                 }
             } elseif ($installertype -eq "msi") {
                 $string = $uninstall_string.PSChildName

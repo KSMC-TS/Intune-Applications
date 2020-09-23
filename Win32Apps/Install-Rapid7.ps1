@@ -3,16 +3,17 @@ param(
     [ValidateSet('Install','Uninstall')]
     [String]$Mode
 )
+$logpath = "$env:SystemRoot\Temp\IntuneLogs"
 
 #Change These Variables Per App
-$appname = "TeamViewer" #needs to match Uninstall DisplayName in Registry
-$appurl = "https://download.teamviewer.com/download/TeamViewer_Setup.exe" #url to pull app from (GitHub, Azure Blob, etc.)
-$addtlargs = "/S /norestart" #any additional args needed for install command
-$installertype = "exe" # 'msi' or 'exe'
+$appname = "Rapid7" #needs to match Uninstall DisplayName in Registry
+$appurl = "" #url to pull app from (GitHub, Azure Blob, etc.)
+$addtlargs = "" #any additional args needed for install command
+$installertype = "msi" # 'msi' or 'exe'
 
 $appnamel = $appname.Replace(" ","-")
-$Path = $env:TEMP
-$logpath = "$env:SystemRoot\Temp\IntuneLogs"
+$Path = $PSScriptRoot
+#$logpath = "$env:SystemRoot\Temp\IntuneLogs"
 $applog = "$logpath\$appnamel-"+(Get-Date -Format "MMddyyyy")+".log"
 if (!(Test-Path $logpath)) { New-Item -ItemType Directory -Path $logpath -Force | Out-Null }
 
@@ -34,7 +35,7 @@ if($Mode -eq "Install") {
             }
         } elseif ($installertype -eq "msi") {
             Write-Output "Running as .msi with additional args: $addtlargs"
-            $InstallCommand = Start-Process $env:WinDir\System32\msiexec.exe -ArgumentList "/I $Path\$Installer /qn $addtlargs" -Verb RunAs -Wait
+            $InstallCommand = Start-Process $env:WinDir\System32\msiexec.exe -ArgumentList "/I $Path\$Installer /quiet" -Verb RunAs -Wait
         } else {
             Write-Output "Unknown installer type: $installertype"
         }
@@ -85,3 +86,6 @@ if($Mode -eq "Uninstall") {
     Exit $UninstallCommand.ExitCode
 }
 Exit 1618
+
+
+## expand logging to capture errors 

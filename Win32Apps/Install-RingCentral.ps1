@@ -6,9 +6,9 @@ param(
 
 #Change These Variables Per App
 $appname = "Ring Central" #needs to match Uninstall DisplayName in Registry
-$appurl = "https://app.ringcentral.com/download/RingCentral.exe" #url to pull app from (GitHub, Azure Blob, etc.)
-$addtlargs = "/s" #any additional args needed for install command
-$installertype = "exe" # 'msi' or 'exe'
+$appurl = "https://app.ringcentral.com/download/RingCentral-x64.msi" #url to pull app from (GitHub, Azure Blob, etc.)
+$addtlargs = "" #any additional args needed for install command
+$installertype = "msi" # 'msi' or 'exe'
 
 $appnamel = $appname.Replace(" ","-")
 $Path = $env:TEMP
@@ -34,7 +34,7 @@ if($Mode -eq "Install") {
             }
         } elseif ($installertype -eq "msi") {
             Write-Output "Running as .msi with additional args: $addtlargs"
-            $InstallCommand = Start-Process $env:WinDir\System32\msiexec.exe -ArgumentList "/I $Path\$Installer /qn $addtlargs" -Verb RunAs -Wait
+            $InstallCommand = Start-Process $env:WinDir\System32\msiexec.exe -ArgumentList "/I $Path\$Installer /qn $addtlargs" -Wait -Verb RunAs
         } else {
             Write-Output "Unknown installer type: $installertype"
         }
@@ -53,7 +53,9 @@ if($Mode -eq "Install") {
 if($Mode -eq "Uninstall") {
     $date = Get-Date -Format "MM/dd/yyyy-HH:mm:ss"
     $(
-        Write-Output "Date: $date" 
+        Write-Output "Date: $date"
+        
+        <#
         Write-Output "Pulling Uninstall Strings"
         $uninstall_strings = Get-ChildItem -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall, HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall | Get-ItemProperty | Where-Object {$_.DisplayName -match "$appname" } | Select-Object -Property DisplayName, UninstallString, PSChildName
         foreach ($uninstall_string in $uninstall_strings) {
@@ -76,8 +78,19 @@ if($Mode -eq "Uninstall") {
                 Write-Output "Unrecognized installer type: $installertype"
             }
         }
-        
+        #>
         #add any post-uninstall tasks here
+
+        Write-Output "Temp path is set: $path"
+        $Installer = "$appnamel.$installertype"
+        Write-Output "Downloading Installer `"$installer`" from `"$appurl`""
+        Invoke-WebRequest $appurl -OutFile $Path\$Installer
+        Write-Output "Running Uninstall"
+        $Logfile = "$logpath\uninstalllog-$appnamel-$(get-date -Format yyyyMMddTHHmmss).log"
+        Write-Output "msiexec uninstall log: $logfile"
+        $UninstallCommand = Start-Process "$env:Windir\System32\msiexec.exe" -ArgumentList "/x $Path\$installer /qn /norestart /L*V `"$logfile`"" -Wait -PassThru -Verb RunAs
+        Write-Output "Cleaning-up Installer"
+        Remove-Item $Path\$Installer
 
         Write-Output "Uninstall Complete!"
         Write-Output "############################################################"

@@ -1,14 +1,13 @@
 param(
 [Parameter(Mandatory=$true)]
 [ValidateSet('Install','Uninstall')]
-[String[]]
-$Mode
+[String]$Mode
 )
 
 #Change These Variables Per App
 $appname = "Labtech" #needs to match Uninstall DisplayName in Registry
 $appurl = "" #url to pull app from (GitHub, Azure Blob, etc.)
-$addtlargs = "/sAll /rs /rps /msi /norestart EULA_ACCEPT=YES" #any additional args needed for install command
+$addtlargs = "/s" #any additional args needed for install command
 $installertype = "exe" # 'msi' or 'exe'
 
 $appnamel = $appname.Replace(" ","-")
