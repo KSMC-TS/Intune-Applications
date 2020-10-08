@@ -2,8 +2,8 @@ Import-Module Az
 Connect-AzAccount
 $localpath = "C:\"
 $location = "northcentralus"
-$rg = "cpwmintune"
-$storageName = "cpwmintune"
+$rg = ""
+$storageName = ""
 $sku = "Standard_LRS"
 #creeate resource group
 New-AzResourceGroup -Name $rg -Location $location
