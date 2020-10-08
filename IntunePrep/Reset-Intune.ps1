@@ -1,6 +1,6 @@
 ## pull logs 
 $logpath = "c:\ksmc\logs\intune"
-if (!(Test-Path $logpath)) {New-Item -ItemType Directory -Path $logpath -Force}
+if (!(Test-Path $logpath)) {New-Item -ItemType Directory -Path $logpath -Force | Out-Null}
 
 # Applications and Services Logs > Microsoft > Windows > DeviceManagement-Enterprise-Diagnostic-Provider
 $logname = "Microsoft-Windows-DeviceManagement-Enterprise-Diagnostics-Provider/Admin"
@@ -34,7 +34,7 @@ Write-Output "Logs saved to: $logpath"
 
 ## clear guid of app from every user on : HKLM:\Software\Microsoft\IntuneManagementExtension\Win32Apps\
 $registrypath = "HKLM:\Software\Microsoft\IntuneManagementExtension\Win32Apps\"
-$intuneguid = Get-ChildItem -path $registrypath | Select-Object * | Where-Object {$_.Name -notmatch "00000000-0000-0000-0000-000000000000"} | Select-Object -ExpandProperty PSChildName
+$intuneguid = Get-ChildItem -path $registrypath | Select-Object * | Where-Object {($_.Name -notmatch "00000000-0000-0000-0000-000000000000") -and ($_.Name -notmatch "Reporting")} | Select-Object -ExpandProperty PSChildName
 $appkeys = Get-ChildItem -Path $registrypath\$intuneguid | Select-Object -ExpandProperty PSChildName
 Write-Output "Clearing Win32Apps from Registry.."
 # delete all apps for full reset
