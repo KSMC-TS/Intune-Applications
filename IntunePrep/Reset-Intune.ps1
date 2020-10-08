@@ -35,12 +35,15 @@ Write-Output "Logs saved to: $logpath"
 ## clear guid of app from every user on : HKLM:\Software\Microsoft\IntuneManagementExtension\Win32Apps\
 $registrypath = "HKLM:\Software\Microsoft\IntuneManagementExtension\Win32Apps\"
 $intuneguid = Get-ChildItem -path $registrypath | Select-Object * | Where-Object {($_.Name -notmatch "00000000-0000-0000-0000-000000000000") -and ($_.Name -notmatch "Reporting")} | Select-Object -ExpandProperty PSChildName
-$appkeys = Get-ChildItem -Path $registrypath\$intuneguid | Select-Object -ExpandProperty PSChildName
-Write-Output "Clearing Win32Apps from Registry.."
-# delete all apps for full reset
-foreach ($appkey in $appkeys) {
-    Remove-Item $registrypath\$intuneguid\$appkey -Recurse
+foreach ($guid in $intuneguid) {
+    $appkeys = Get-ChildItem -Path $registrypath\$guid | Select-Object -ExpandProperty PSChildName
+    Write-Output "Clearing Win32Apps from Registry guid $guid .."
+    # delete all apps for full reset
+    foreach ($appkey in $appkeys) {
+        Remove-Item $registrypath\$guid\$appkey -Recurse
+    }
 }
+
 
 ## Restart Intune management extension agent service
 Write-Output "Restarting Service.."
