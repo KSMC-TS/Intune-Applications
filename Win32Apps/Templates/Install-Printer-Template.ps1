@@ -50,10 +50,34 @@ if($Mode -eq "Install") {
                 Write-Output "$driverresults"
             }
         }
-        Write-Output "Installing Printer: $Printername with Port Name: $printernamel IP: $printerip"
-        Add-PrinterDriver -Name $drivername
-        Add-PrinterPort -Name $printernamel -PrinterHostAddress $printerip
-        Add-Printer $printername -DriverName $drivername -PortName $printernamel
+        if (!(Get-PrinterDriver -name $drivername)) { 
+            Write-Output "Adding Printer driver $drivername" 
+            Add-PrinterDriver -Name $drivername 
+        } else { 
+            Write-Output "Printer driver $drivername already exists, skipping" 
+        }
+        if (!(Get-PrinterPort -Name $printernamel)) {
+            Write-Output "Creating Printer port $printernamel with IP $printerip" 
+            Add-PrinterPort -Name $printernamel -PrinterHostAddress $printerip 
+        } else { 
+            Write-Output "Printer port $printernamel already exists, checking IP"
+            $portip = Get-PrinterPort -Name $printernamel | Select-Object -ExpandProperty PrinterHostAddress 
+            if (!($portip -match $printerip)) {
+                Write-Output "$portip doesn't match $printerip - updating"
+                Remove-PrinterPort -Name $printernamel
+                Add-PrinterPort -Name $printernamel -PrinterHostAddress $printerip 
+            } else {
+                Write-Output "Port IP is correct, skipping"
+            }
+        }
+        if (!(Get-Printer -Name $printername)) { 
+            Write-Output "Creating Printer $printername" 
+            Add-Printer $printername -DriverName $drivername -PortName $printernamel 
+        } else { 
+            Write-Output "Printer $printername already exists, skipping"
+        }
+
+        
 
         #add any post-install tasks here
 

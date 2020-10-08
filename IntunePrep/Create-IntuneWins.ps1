@@ -1,7 +1,7 @@
 param (
     $basedir = "",
-    $exe = ""
-)
+    $exe = "" 
+    )
 
 $intunedir = "$basedir\intune"
 $installersdir = "$intunedir\installers"
@@ -22,7 +22,7 @@ $files = Get-ChildItem $win32app -File
 
 foreach ($file in $files) {
     Copy-Item -Path $file -Destination $wd
-    $wdfile = Get-ChildItem $wd -File
+    $wdfile = Get-ChildItem $wd\*.ps1 -File
     Start-Process $exe -ArgumentList "-c `"$wd`" -s `"$wdfile`" -o `"$outdir`" -q" -Wait
     Remove-Item $wdfile -Force
 }
