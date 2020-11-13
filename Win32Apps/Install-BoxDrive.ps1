@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory=$true)]
     [ValidateSet('Install','Uninstall')]
-    [String]$Mode,
+    [String]$Mode="Install",
     $localfile
 )
 
