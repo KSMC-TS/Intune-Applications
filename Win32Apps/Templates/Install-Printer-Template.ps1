@@ -19,7 +19,9 @@ $drivermodel = "" #model of printer / universal (ex- UD3)
 $drivertype = "" # PCL6 / PS
 $printername = "" #user friendly name for printer
 $printerip = "" # IP/FQDN address of printer
+$scriptver = "" #change this number each time you change script [date dot version ex- 103020.1 ]
 
+$regkey = "HKLM:\SYSTEM\CurrentControlSet\Control\Print\Printers\$printername"
 $arch = ((Get-CimInstance CIM_OperatingSystem).OSArchitecture).Replace("-","")
 $driverfiles = "$psscriptroot\$drivermfg\$drivermodel"
 $printernamel = $printername.Replace(" ","-")
@@ -50,13 +52,16 @@ if($Mode -eq "Install") {
                 Write-Output "$driverresults"
             }
         }
-        if (!(Get-PrinterDriver -name $drivername)) { 
+        
+        $installeddrivers = Get-PrinterDriver
+        if (!($installeddrivers -match $drivername)) { 
             Write-Output "Adding Printer driver $drivername" 
             Add-PrinterDriver -Name $drivername 
         } else { 
             Write-Output "Printer driver $drivername already exists, skipping" 
         }
-        if (!(Get-PrinterPort -Name $printernamel)) {
+        $installedports = Get-PrinterPort
+        if (!($installedports -match $printernamel)) {
             Write-Output "Creating Printer port $printernamel with IP $printerip" 
             Add-PrinterPort -Name $printernamel -PrinterHostAddress $printerip 
         } else { 
@@ -70,16 +75,30 @@ if($Mode -eq "Install") {
                 Write-Output "Port IP is correct, skipping"
             }
         }
-        if (!(Get-Printer -Name $printername)) { 
+        $installedprinters = Get-Printer
+        if (!($installedprinters -match $printername)) { 
             Write-Output "Creating Printer $printername" 
             Add-Printer $printername -DriverName $drivername -PortName $printernamel 
         } else { 
-            Write-Output "Printer $printername already exists, skipping"
+            Write-Output "Printer $printername already exists, recreating"
+            Remove-Printer $printername
+            Add-Printer $printername -DriverName $drivername -PortName $printernamel 
         }
 
         
 
         #add any post-install tasks here
+        #Set-PrintConfiguration -PrinterName $printername -Color $false -DuplexingMode OneSided
+        
+        #creating regkey value for deployment version
+        $deployver = Get-ItemProperty -Path $regkey | Select-Object -ExpandProperty IntuneDeploy -ErrorAction SilentlyContinue
+        if ($null -eq $deployver) {
+            Write-Output "Creating 'IntuneDeploy' with value $scriptver under $regkey"
+            New-ItemProperty -Path $regkey -Name IntuneDeploy -Value "$scriptver" -PropertyType String -Force
+        } else {
+            Write-Output "Updating 'IntuneDeploy' with value $scriptver under $regkey"
+            Set-ItemProperty -Path $regkey -Name IntuneDeploy -Value "$scriptver" -Force
+        }
 
         Write-Output "Install Complete!"
         Write-Output "############################################################"
