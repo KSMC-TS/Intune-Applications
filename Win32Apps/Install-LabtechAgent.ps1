@@ -1,14 +1,17 @@
 param(
 [Parameter(Mandatory=$true)]
 [ValidateSet('Install','Uninstall')]
-[String]$Mode
+[String]$Mode,
+$localfile
 )
 
 #Change These Variables Per App
 $appname = "Labtech" #needs to match Uninstall DisplayName in Registry
 $appurl = "" #url to pull app from (GitHub, Azure Blob, etc.)
-$addtlargs = "/s" #any additional args needed for install command
+$addtlargs = "/sAll /rs /rps /msi /norestart EULA_ACCEPT=YES" #any additional args needed for install command
 $installertype = "exe" # 'msi' or 'exe'
+$localinstaller = "Agent_Install.exe" #file name of installer
+$applicationexe = "C:\Windows\LTSvc\LTsvc.exe" #location of exe post-install CURRENTLY UNUSED
 
 $appnamel = $appname.Replace(" ","-")
 $Path = $env:TEMP
@@ -21,16 +24,29 @@ if($Mode -eq "Install") {
     $date = Get-Date -Format "MM/dd/yyyy-HH:mm:ss"
     $(
         Write-Output "Date: $date" 
-        Write-Output "Temp path is set: $path"
-        $Installer = "$appnamel.$installertype"
-        Write-Output "Downloading Installer `"$installer`" from `"$appurl`""
-        Invoke-WebRequest $appurl -OutFile $Path\$Installer
+        
+        
+        if ($localfile -eq $true) {
+            $path = "."
+            Write-Output "Temp path is set: $path , Local Installer"
+            $Installer = "$localinstaller"
+            if (!(Test-Path "$path\$installer")) { Write-Ouput "Local Installer Not Found"}
+        } else {
+            Write-Output "Temp path is set: $path"
+            $Installer = "$appnamel.$installertype"
+            Write-Output "Downloading Installer `"$installer`" from `"$appurl`""
+            Invoke-WebRequest $appurl -OutFile $Path\$Installer
+            if (!(Test-Path $Path\$Installer)) {Write-Output "Download failed"}
+        }
+        
         if ($installertype -eq "exe") {
-            Write-Output "Running as .exe with additional args: $addtlargs"
             if ($null -match $addtlargs) {
+                Write-Output "Running as .exe with no args"
                 $InstallCommand = Start-Process -FilePath $Path\$Installer -Verb RunAs -Wait    
             } else {
-                $InstallCommand = Start-Process -FilePath $Path\$Installer -Args "$addtlargs" -Verb RunAs -Wait
+                Write-Output "Running as .exe with additional args: $addtlargs"
+                $InstallCommand = Start-Process -FilePath $Path\$Installer -ArgumentList "$addtlargs" -Verb RunAs -Wait
+                Write-Output "Install output: $InstallCommand"
             }
         } elseif ($installertype -eq "msi") {
             Write-Output "Running as .msi with additional args: $addtlargs"
